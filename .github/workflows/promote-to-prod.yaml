@@ -1,0 +1,60 @@
+name: Promote to prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Short SHA of the image to promote (e.g. 629ca59)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify image exists in GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/myapp:${{ inputs.sha }}
+        run: |
+          set -euo pipefail
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+          docker manifest inspect "$IMAGE" > /dev/null
+          echo "Verified $IMAGE is present in GHCR."
+
+      - name: Bump prod image tag
+        env:
+          NEW_TAG: ${{ inputs.sha }}
+        run: |
+          set -euo pipefail
+          sed -i "s/^  tag: .*/  tag: ${NEW_TAG}/" helm/myapp/values-prod.yaml
+          git diff helm/myapp/values-prod.yaml
+
+      - name: Open promotion PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: promote/prod-${{ inputs.sha }}
+          base: main
+          commit-message: "chore(prod): promote myapp to ${{ inputs.sha }}"
+          title: "Promote prod -> ${{ inputs.sha }}"
+          body: |
+            Promotes `ghcr.io/${{ github.repository_owner }}/myapp:${{ inputs.sha }}` to prod.
+
+            - Triggered by: @${{ github.actor }}
+            - Image verified in GHCR: yes
+            - Diff: bumps `helm/myapp/values-prod.yaml` `image.tag`
+
+            Merging this PR will cause ArgoCD to sync prod to the new image.
+          labels: |
+            promotion
+            prod
+          reviewers: ${{ github.actor }}
