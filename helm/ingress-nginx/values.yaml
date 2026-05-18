@@ -1,0 +1,17 @@
+ingress-nginx:
+  controller:
+    admissionWebhooks:
+      createSecretJob:
+        resources:
+          limits:
+            memory: 20Mi
+          requests:
+            memory: 20Mi
+            cpu: 10m
+    resources:
+      limits:
+        memory: 500Mi
+      requests:
+        memory: 90Mi
+        cpu: 100m
+    replicaCount: 2            

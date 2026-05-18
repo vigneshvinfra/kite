@@ -1,0 +1,8 @@
+ingress-nginx:
+  controller:
+    resources:
+      limits:
+        memory: 5000Mi
+      requests:
+        memory: 2000Mi
+        cpu: 1000m

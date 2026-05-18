@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ingress-nginx
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+            - key: env
+              operator: In
+              values: [dev, prod]
+  template:
+    metadata:
+      name: 'ingress-nginx-{{name}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: 'infra-{{name}}'
+      source:
+        repoURL: https://github.com/vigneshv/kite
+        targetRevision: main
+        path: helm/ingress-nginx
+        helm:
+          releaseName: ingress-nginx
+          valueFiles:
+            - values.yaml
+            - 'values-{{name}}.yaml'
+      destination:
+        name: '{{name}}'
+        namespace: ingress-nginx
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

@@ -1,0 +1,172 @@
+{{- if .Values.networkPolicy.enabled }}
+{{/*
+NetworkPolicies for myapp.
+
+Kubernetes NetworkPolicy semantics:
+- If NO policy selects a pod → all traffic allowed (legacy default).
+- If ANY policy selects a pod for policyType X → that direction becomes
+  default-deny EXCEPT for the union of allows across all matching policies.
+
+We rely on this by always having at least one Ingress and one Egress policy
+when `networkPolicy.enabled` is true. The explicit `default-deny` below is
+redundant given the others but makes intent clear in `kubectl get netpol`.
+*/}}
+
+---
+# 1. Default deny — explicit, for clarity in audit/inspection.
+# (Even without this, the other policies below make ingress/egress
+#  default-deny since they select the same pods.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-default-deny
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# 2. Allow ingress from the ingress controller on port 8000.
+# This is how user HTTP traffic reaches myapp.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-from-ingress
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.ingressNamespace }}
+          {{- with .Values.networkPolicy.ingressPodSelector }}
+          podSelector:
+            matchLabels:
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
+      ports:
+        - protocol: TCP
+          port: 8000
+
+---
+{{- if .Values.metrics.serviceMonitor.enabled }}
+# 3. Allow ingress from Prometheus scraper on port 8000 (/metrics endpoint).
+# Only included when serviceMonitor is enabled.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-from-prometheus
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.monitoringNamespace }}
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+{{- end }}
+
+# 4. Allow egress to kube-dns. Without this, all DNS lookups fail.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-egress-dns
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+{{- if .Values.networkPolicy.otelCollector.enabled }}
+# 5. Allow egress to the OTel collector for trace export.
+# Only included when OTel tracing is enabled.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-egress-otel
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.otelCollector.namespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.networkPolicy.otelCollector.port }}
+---
+{{- end }}
+
+{{- if .Values.networkPolicy.allowHTTPSEgress }}
+# 6. Allow egress to internet over HTTPS (port 443).
+# Excludes RFC1918 private ranges and AWS IMDS to prevent SSRF abuse
+# and credential theft from the instance metadata service.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-egress-https
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32   # AWS IMDS — never accessible from pods
+              - 10.0.0.0/8           # cluster internal (already handled by other rules)
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+{{- end }}
+{{- end }}
