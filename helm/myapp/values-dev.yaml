@@ -1,6 +1,6 @@
 
 image:
-  tag: dev-latest
+  tag: 629ca59
 
 env:
   ENV: dev

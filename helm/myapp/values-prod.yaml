@@ -1,7 +1,7 @@
 replicaCount: 3
 
 image:
-  tag: v1.0.0
+  tag: 629ca59
 
 env:
   ENV: prod
