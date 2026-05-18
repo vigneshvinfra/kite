@@ -1,0 +1,6 @@
+apiVersion: v2
+name: myapp
+description: HTTP service
+type: application
+version: 0.1.0        # chart version (bumped when templates change)
+appVersion: "1.0.0"   # app version (matches image tag conceptually)
