@@ -54,3 +54,21 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
+
+      - name: Bump dev image tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          NEW_TAG: ${{ steps.sha.outputs.short_sha }}
+        run: |
+          set -euo pipefail
+          sed -i "s/^  tag: .*/  tag: ${NEW_TAG}/" helm/myapp/values-dev.yaml
+          if git diff --quiet helm/myapp/values-dev.yaml; then
+            echo "values-dev.yaml already at ${NEW_TAG}, nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add helm/myapp/values-dev.yaml
+          git commit -m "chore(dev): bump myapp image to ${NEW_TAG} [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
