@@ -1,0 +1,9 @@
+ingress-nginx:
+  controller:
+    replicaCount: 1
+    resources:
+      limits:
+        memory: 200Mi
+      requests:
+        memory: 50Mi
+        cpu: 25m

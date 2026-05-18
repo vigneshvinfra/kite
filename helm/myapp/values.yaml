@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/vigneshvinfra/myapp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  host: myapp.localhost
+  tls:
+    enabled: false
+    secretName: ""
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+commonLabels:
+  team: devops
+
+rbac:
+  create: false
+  rules: []
+
+secrets:
+  enabled: false
+
+networkPolicy:
+  enabled: false

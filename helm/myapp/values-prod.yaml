@@ -1,0 +1,54 @@
+replicaCount: 3
+
+image:
+  tag: v1.0.0
+
+env:
+  ENV: prod
+
+commonLabels:
+  environment: prod  
+
+ingress:
+  host: myapp.example.com
+  tls:
+    enabled: true
+    secretName: myapp-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+secrets:
+  enabled: true
+  objects:
+    # TODO: replace account ID + secret name/suffix with real Secrets Manager ARN
+    - objectName: "arn:aws:secretsmanager:us-east-1:000000000000:secret:prod/myapp-XXXXXX"
+      objectType: secretsmanager
+      objectAlias: ssm-values.json
+      filePermission: "0444"
+
+networkPolicy:
+  enabled: true
+  ingressNamespace: ingress-nginx
+  # Narrow further to specific ingress pods if desired, e.g.:
+  # ingressPodSelector:
+  #   app.kubernetes.io/name: ingress-nginx
+  ingressPodSelector: {}
+  monitoringNamespace: monitoring
+  # Flip to true if myapp needs to reach external HTTPS endpoints
+  # (third-party APIs, etc). Egress to AWS Secrets Manager goes via the
+  # CSI provider DaemonSet, not from this pod, so this is not needed for secrets.
+  allowHTTPSEgress: false
+  otelCollector:
+    enabled: false
+    namespace: observability
+    port: 4317

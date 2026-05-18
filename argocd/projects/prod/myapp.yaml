@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: myapp-prod
+  namespace: argocd
+spec:
+  description: myapp (prod)
+  sourceRepos:
+    - https://github.com/vigneshv/kite
+  destinations:
+    - name: prod
+      namespace: myapp-prod
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  roles:
+    - name: reader
+      description: Read-only access to myapp-prod applications
+      policies:
+        - p, proj:myapp-prod:reader, applications, get, myapp-prod/*, allow
+    - name: sync-operator
+      description: Read + sync myapp-prod applications
+      policies:
+        - p, proj:myapp-prod:sync-operator, applications, get, myapp-prod/*, allow
+        - p, proj:myapp-prod:sync-operator, applications, sync, myapp-prod/*, allow
+  syncWindows:
+    - kind: deny
+      schedule: '* * * * *'
+      duration: 24h
+      applications: ['*']
+      manualSync: true
