@@ -36,6 +36,10 @@ secrets:
       objectAlias: ssm-values.json
       filePermission: "0444"
 
+metrics:
+  serviceMonitor:
+    enabled: true
+
 networkPolicy:
   enabled: true
   ingressNamespace: ingress-nginx
