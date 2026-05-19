@@ -1,0 +1,5 @@
+# Prod overrides intentionally minimal — base values already enable
+# syncSecret + rotation, which is what prod wants. Add resource limits
+# or affinity here if needed once usage is observed.
+secrets-store-csi-driver: {}
+secrets-store-csi-driver-provider-aws: {}

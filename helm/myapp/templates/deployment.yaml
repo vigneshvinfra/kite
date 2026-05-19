@@ -27,6 +27,11 @@ spec:
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
+          {{- if and .Values.secrets.enabled .Values.secrets.envFromSecretName }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secrets.envFromSecretName }}
+          {{- end }}
           livenessProbe:
             httpGet: { path: /health, port: http }
           readinessProbe:

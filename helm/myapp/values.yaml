@@ -36,6 +36,9 @@ rbac:
 
 secrets:
   enabled: false
+  objects: []
+  syncedSecrets: []
+  envFromSecretName: ""
 
 networkPolicy:
   enabled: false

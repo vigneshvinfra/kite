@@ -28,13 +28,24 @@ resources:
     memory: 256Mi
 
 secrets:
-  enabled: false
+  enabled: true
   objects:
-    # TODO: replace account ID + secret name/suffix with real Secrets Manager ARN
-    - objectName: "arn:aws:secretsmanager:us-east-1:000000000000:secret:prod/myapp-XXXXXX"
+    - objectName: "prod/myapp/api-key"
       objectType: secretsmanager
-      objectAlias: ssm-values.json
+      objectAlias: API_KEY
+    - objectName: "prod/myapp/config"
+      objectType: secretsmanager
+      objectAlias: config.json
       filePermission: "0444"
+
+  syncedSecrets:
+    - secretName: myapp-env
+      type: Opaque
+      data:
+        - objectName: API_KEY
+          key: API_KEY
+
+  envFromSecretName: myapp-env
 
 metrics:
   serviceMonitor:
@@ -45,14 +56,8 @@ metrics:
 networkPolicy:
   enabled: true
   ingressNamespace: ingress-nginx
-  # Narrow further to specific ingress pods if desired, e.g.:
-  # ingressPodSelector:
-  #   app.kubernetes.io/name: ingress-nginx
   ingressPodSelector: {}
   monitoringNamespace: monitoring
-  # Flip to true if myapp needs to reach external HTTPS endpoints
-  # (third-party APIs, etc). Egress to AWS Secrets Manager goes via the
-  # CSI provider DaemonSet, not from this pod, so this is not needed for secrets.
   allowHTTPSEgress: false
   otelCollector:
     enabled: false

@@ -1,0 +1,11 @@
+secrets-store-csi-driver:
+  syncSecret:
+    enabled: true
+  enableSecretRotation: true
+  rotationPollInterval: 2m
+  tokenRequests:
+    - audience: pods.eks.amazonaws.com
+    - audience: sts.amazonaws.com
+  providersDir: /var/run/secrets-store-csi-providers
+
+secrets-store-csi-driver-provider-aws: {}
