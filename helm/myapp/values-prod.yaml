@@ -39,6 +39,8 @@ secrets:
 metrics:
   serviceMonitor:
     enabled: true
+  dashboard:
+    enabled: true
 
 networkPolicy:
   enabled: true

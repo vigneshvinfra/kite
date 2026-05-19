@@ -43,3 +43,5 @@ networkPolicy:
 metrics:
   serviceMonitor:
     enabled: false
+  dashboard:
+    enabled: false

@@ -1,0 +1,12 @@
+{{- if .Values.metrics.dashboard.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-dashboard
+  labels:
+    grafana_dashboard: "1"
+    {{- include "myapp.labels" . | nindent 4 }}
+data:
+  myapp.json: |-
+{{ .Files.Get "dashboards/myapp.json" | indent 4 }}
+{{- end }}
