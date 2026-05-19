@@ -19,7 +19,7 @@ spec:
     spec:
       project: 'infra-{{name}}'
       source:
-        repoURL: https://github.com/vigneshv/kite
+        repoURL: git@github.com:vigneshvinfra/kite.git
         targetRevision: main
         path: helm/ingress-nginx
         helm:

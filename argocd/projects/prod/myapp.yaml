@@ -6,7 +6,7 @@ metadata:
 spec:
   description: myapp (prod)
   sourceRepos:
-    - https://github.com/vigneshv/kite
+    - git@github.com:vigneshvinfra/kite.git
   destinations:
     - name: prod
       namespace: myapp-prod
