@@ -9,14 +9,17 @@ metadata:
   {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if and .Values.ingress.tls.enabled .Values.ingress.host }}
   tls:
     - hosts:
         - {{ .Values.ingress.host }}
       secretName: {{ .Values.ingress.tls.secretName }}
   {{- end }}
   rules:
-    - host: {{ .Values.ingress.host }}
+    -
+      {{- with .Values.ingress.host }}
+      host: {{ . }}
+      {{- end }}
       http:
         paths:
           - path: /

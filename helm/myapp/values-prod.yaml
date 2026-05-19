@@ -10,9 +10,9 @@ commonLabels:
   environment: prod  
 
 ingress:
-  host: myapp.example.com
+  host: ""
   tls:
-    enabled: true
+    enabled: false
     secretName: myapp-tls
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
