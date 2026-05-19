@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Platform / infrastructure components (dev)
   sourceRepos:
-    - https://github.com/vigneshv/kite
+    - git@github.com:vigneshvinfra/kite.git
     - https://kubernetes.github.io/ingress-nginx
   destinations:
     - name: dev

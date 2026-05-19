@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/vigneshv/kite
+    repoURL: git@github.com:vigneshvinfra/kite.git
     targetRevision: main
     path: argocd/applications
     directory:

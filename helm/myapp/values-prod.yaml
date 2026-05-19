@@ -28,7 +28,7 @@ resources:
     memory: 256Mi
 
 secrets:
-  enabled: true
+  enabled: false
   objects:
     # TODO: replace account ID + secret name/suffix with real Secrets Manager ARN
     - objectName: "arn:aws:secretsmanager:us-east-1:000000000000:secret:prod/myapp-XXXXXX"
