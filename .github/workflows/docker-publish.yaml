@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore:
+      - 'argocd/**'
+      - 'helm/**'
+      - '**/*.md'
   release:
     types: [published]
 
