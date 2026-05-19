@@ -25,6 +25,10 @@ inputs:
   build-args:
     description: List of build-time variables
     required: false
+  platforms:
+    description: Comma-separated list of target platforms
+    required: false
+    default: linux/amd64,linux/arm64
 
 outputs:
   image:
@@ -73,6 +77,7 @@ runs:
         context: ${{ inputs.context }}
         file: ${{ inputs.dockerfile }}
         push: true
+        platforms: ${{ inputs.platforms }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         annotations: ${{ steps.meta.outputs.annotations }}
