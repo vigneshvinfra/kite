@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+            - key: env
+              operator: In
+              values: [prod]
+  template:
+    metadata:
+      name: 'kube-prometheus-stack-{{name}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: 'monitoring-{{name}}'
+      source:
+        repoURL: git@github.com:vigneshvinfra/kite.git
+        targetRevision: main
+        path: helm/kube-prometheus-stack
+        helm:
+          releaseName: kube-prometheus-stack
+          valueFiles:
+            - values.yaml
+            - 'values-{{name}}.yaml'
+      destination:
+        name: '{{name}}'
+        namespace: monitoring
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

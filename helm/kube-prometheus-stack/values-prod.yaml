@@ -1,0 +1,43 @@
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      retention: 15d
+      retentionSize: "40GiB"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+            resources:
+              requests:
+                storage: 50Gi
+      resources:
+        limits:
+          memory: 4Gi
+        requests:
+          memory: 2Gi
+          cpu: 500m
+
+  grafana:
+    # Admin credentials come from a Secret created out-of-band:
+    #   kubectl -n monitoring create secret generic grafana-admin \
+    #     --from-literal=admin-user=admin \
+    #     --from-literal=admin-password="$(openssl rand -base64 24)"
+    admin:
+      existingSecret: grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        external-dns.alpha.kubernetes.io/ttl: "300"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      hosts:
+        - grafana.example.com
+      path: /
+      pathType: Prefix
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.example.com

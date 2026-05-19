@@ -1,0 +1,38 @@
+kube-prometheus-stack:
+  crds:
+    enabled: true
+
+  prometheusOperator:
+    resources:
+      limits:
+        memory: 400Mi
+      requests:
+        memory: 200Mi
+        cpu: 100m
+
+  prometheus:
+    prometheusSpec:
+      retention: 15d
+      resources:
+        limits:
+          memory: 2Gi
+        requests:
+          memory: 1Gi
+          cpu: 200m
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      probeSelectorNilUsesHelmValues: false
+
+  alertmanager:
+    alertmanagerSpec:
+      resources:
+        limits:
+          memory: 200Mi
+        requests:
+          memory: 100Mi
+          cpu: 50m
+
+  grafana:
+    enabled: true
+    defaultDashboardsTimezone: utc
