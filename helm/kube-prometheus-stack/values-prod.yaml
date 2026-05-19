@@ -1,3 +1,9 @@
+# Plaintext Grafana admin credentials.Anything here is in git
+# history forever. Rotate by editing this file.
+grafanaAdmin:
+  user: admin
+  password: "REPLACE_ME_BEFORE_COMMITTING"
+
 kube-prometheus-stack:
   prometheus:
     prometheusSpec:
@@ -18,10 +24,6 @@ kube-prometheus-stack:
           cpu: 500m
 
   grafana:
-    # Admin credentials come from a Secret created out-of-band:
-    #   kubectl -n monitoring create secret generic grafana-admin \
-    #     --from-literal=admin-user=admin \
-    #     --from-literal=admin-password="$(openssl rand -base64 24)"
     admin:
       existingSecret: grafana-admin
       userKey: admin-user
