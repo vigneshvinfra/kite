@@ -39,3 +39,7 @@ secrets:
 
 networkPolicy:
   enabled: false
+
+metrics:
+  serviceMonitor:
+    enabled: false
