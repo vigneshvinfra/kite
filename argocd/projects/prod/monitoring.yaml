@@ -11,6 +11,8 @@ spec:
   destinations:
     - name: prod
       namespace: monitoring
+    - name: prod
+      namespace: kube-system
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
