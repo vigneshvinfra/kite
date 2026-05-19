@@ -15,3 +15,8 @@ resources:
   limits:
     cpu: 100m
     memory: 64Mi
+
+# Skip the Ingress in dev
+
+ingress:
+  enabled: false
