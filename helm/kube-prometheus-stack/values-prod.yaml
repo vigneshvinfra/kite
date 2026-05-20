@@ -1,9 +1,3 @@
-# Plaintext Grafana admin credentials.Anything here is in git
-# history forever. Rotate by editing this file.
-grafanaAdmin:
-  user: admin
-  password: "REPLACE_ME_BEFORE_COMMITTING"
-
 kube-prometheus-stack:
   prometheus:
     prometheusSpec:
@@ -28,6 +22,17 @@ kube-prometheus-stack:
       existingSecret: grafana-admin
       userKey: admin-user
       passwordKey: admin-password
+    extraVolumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: grafana-secrets
+    extraVolumeMounts:
+      - name: secrets-store
+        mountPath: /mnt/secrets-store
+        readOnly: true
     ingress:
       enabled: true
       ingressClassName: nginx
