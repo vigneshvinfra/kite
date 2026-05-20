@@ -1,17 +1,4 @@
 {{- if .Values.networkPolicy.enabled }}
-{{/*
-NetworkPolicies for myapp.
-
-Kubernetes NetworkPolicy semantics:
-- If NO policy selects a pod → all traffic allowed (legacy default).
-- If ANY policy selects a pod for policyType X → that direction becomes
-  default-deny EXCEPT for the union of allows across all matching policies.
-
-We rely on this by always having at least one Ingress and one Egress policy
-when `networkPolicy.enabled` is true. The explicit `default-deny` below is
-redundant given the others but makes intent clear in `kubectl get netpol`.
-*/}}
-
 ---
 # 1. Default deny — explicit, for clarity in audit/inspection.
 # (Even without this, the other policies below make ingress/egress
