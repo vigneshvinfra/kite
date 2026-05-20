@@ -16,16 +16,6 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
-  roles:
-    - name: reader
-      description: Read-only access to myapp-prod applications
-      policies:
-        - p, proj:myapp-prod:reader, applications, get, myapp-prod/*, allow
-    - name: sync-operator
-      description: Read + sync myapp-prod applications
-      policies:
-        - p, proj:myapp-prod:sync-operator, applications, get, myapp-prod/*, allow
-        - p, proj:myapp-prod:sync-operator, applications, sync, myapp-prod/*, allow
   syncWindows:
     - kind: deny
       schedule: '* * * * *'

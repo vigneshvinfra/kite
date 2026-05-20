@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bootstrap
+  namespace: argocd
+spec:
+  description: |
+    Bootstrap Applications only — root-app, projects, applicationsets.
+    These manage Argo resources (Application/ApplicationSet/AppProject)
+    in the argocd namespace itself. Nothing else should land here.
+  sourceRepos:
+    - git@github.com:vigneshvinfra/kite.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  # Bootstrap Apps don't create cluster-scoped resources.
+  clusterResourceWhitelist: []
+  # Only the three Argo CRDs, in the argocd namespace.
+  namespaceResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+    - group: argoproj.io
+      kind: ApplicationSet
+    - group: argoproj.io
+      kind: AppProject

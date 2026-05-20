@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: bootstrap
   source:
     repoURL: git@github.com:vigneshvinfra/kite.git
     targetRevision: main

@@ -16,13 +16,3 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
-  roles:
-    - name: reader
-      description: Read-only access to myapp-dev applications
-      policies:
-        - p, proj:myapp-dev:reader, applications, get, myapp-dev/*, allow
-    - name: sync-operator
-      description: Read + sync myapp-dev applications
-      policies:
-        - p, proj:myapp-dev:sync-operator, applications, get, myapp-dev/*, allow
-        - p, proj:myapp-dev:sync-operator, applications, sync, myapp-dev/*, allow
