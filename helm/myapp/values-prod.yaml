@@ -52,6 +52,8 @@ metrics:
     enabled: true
   dashboard:
     enabled: true
+  alerts:
+    enabled: true
 
 networkPolicy:
   enabled: true

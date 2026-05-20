@@ -1,0 +1,50 @@
+{{- if .Values.metrics.alerts.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: myapp.rules
+      interval: 30s
+      rules:
+        - alert: MyappHighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{job="myapp", status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{job="myapp"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            service: myapp
+          annotations:
+            summary: "myapp 5xx error rate > 5% for 5m"
+            description: "Sustained 5xx rate above 5% — likely a regression in the latest deploy or an upstream dependency failing."
+
+        - alert: MyappHighLatencyP95
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="myapp"}[5m])) by (le)
+            ) > 1
+          for: 10m
+          labels:
+            severity: warning
+            service: myapp
+          annotations:
+            summary: "myapp p95 latency > 1s for 10m"
+            description: "p95 request latency degraded — check pod CPU, downstream dependencies, or recent deploys."
+
+        - alert: MyappTargetDown
+          expr: up{job="myapp"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: myapp
+          annotations:
+            summary: "Prometheus cannot scrape a myapp instance"
+            description: "One or more myapp pods are not being scraped for 2m. Either the pod is down or its /metrics endpoint is unreachable."
+{{- end }}

@@ -48,3 +48,5 @@ metrics:
     enabled: false
   dashboard:
     enabled: false
+  alerts:
+    enabled: false
