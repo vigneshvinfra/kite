@@ -1,3 +1,8 @@
+# Identity used by the prod Argo CD to manage a remote Kubernetes cluster.
+# Applied on the dev k3s cluster by terraform/dev/cloud-init.sh on first boot.
+# The token Secret is populated automatically by the kubernetes token controller
+# and read back by `argocd/cluster/argo-dev-cluster.sh` to render the registration.
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -13,9 +18,9 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: argocd-manager
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: argocd-manager
+    namespace: kube-system
 ---
 apiVersion: v1
 kind: Secret

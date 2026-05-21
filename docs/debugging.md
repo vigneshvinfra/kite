@@ -5,6 +5,20 @@
 
 
 504 Gateway Timeout in Kubernetes means the Ingress Controller connected to the backend but never got a response in time from a backend service. The Ingress's read timeout might be lower than the app's actual response time. This could also happen due to the application being slow.
+
+  ## Table of contents
+
+ - [What "healthy pod" actually means](#what-healthy-pod-actually-means)
+  - [Request flow](#request-flow)
+  - [Troubleshooting](#troubleshooting)
+    - [Hop 1: client -> LB](#hop-1-client---lb)
+    - [Hop 2: LB -> Ingress Controller](#hop-2-lb---ingress-controller)
+    - [Hop 3: Ingress Controller](#hop-3-ingress-controller)
+    - [Hop 4: Ingress Controller -> Service](#hop-4-ingress-controller---service)
+    - [Hop 5: Service -> Endpoints](#hop-5-service---endpoints)
+    - [Hop 6: Endpoints -> Pod](#hop-6-endpoints---pod)
+  - [Additional checks](#additional-checks)
+    - [NetworkPolicy blocking ingress-nginx to pod traffic](#networkpolicy-blocking-ingress-nginx-to-pod-traffic)
   
 ## What "healthy pod" actually means
 STATUS: Running doesn't really mean the pod started without errors. They only tell us:
@@ -32,7 +46,7 @@ Each component is a hop that can fail independently. We need to work top-down to
 
 ## Troubleshooting
 
-### Hop 1: client → LB
+### Hop 1: client -> LB
 We need to first see if the DNS resolves to a public IP and we get a response back.
 
 ```bash
@@ -44,7 +58,7 @@ If the DNS resolves to a private ip and the client is outside the VPC. The reque
 
 In case if curl hangs and times out eventually. we would probably need to check the routing or security group or NACLs between client and Load balancer is blocking the traffic. We also need to check if the VPC has internet gateway and a route to the internet.
 
-### Hop 2: LB → Ingress Controller
+### Hop 2: LB -> Ingress Controller
 We need to see if the targets for the Load balancer are `healthy`. For an NLB pointing at ingress-nginx pods with target-type as ip, we can check the below command
 
 ```bash
@@ -71,7 +85,7 @@ kubectl -n ingress-nginx logs deploy/ingress-nginx-controller --tail=50
 - 502 entries in the access log with `upstream connect failed`. This means that the ingress nginx controller reached the Service but couldn't connect to the pod.
 - 504 entries with `upstream timed out` → pod is slow or hanging.
 
-### Hop 4: Ingress Controller → Service
+### Hop 4: Ingress Controller -> Service
 Check if the rules have the right host, path and a service that actually exists. We also need to check the ingressClassName to match the controller. 
 ```bash
 kubectl -n <ns> get ingress <name> -o yaml
@@ -84,7 +98,7 @@ kubectl -n <ns> describe ingress <name>
   match an existing Service. A typo in the service name means 503.
 - `ingressClassName` must match the controller's `IngressClass` (in our case this is `nginx`). Wrong class means the Ingress is ignored entirely.
 
-### Hop 5: Service → Endpoints
+### Hop 5: Service -> Endpoints
 Kubernetes Service uses Endpoint objects which holds the actual list of pod IPs to route the request.
   ```bash
   kubectl get endpoints <service-name>
@@ -101,7 +115,7 @@ Kubernetes Service uses Endpoint objects which holds the actual list of pod IPs 
 
 - Backend Protocol Mismatch - If the pod serves https but the ingress treats it as HTTP or vice versa - we would get a 502
 
-### Hop 6: Endpoints → Pod
+### Hop 6: Endpoints -> Pod
 
 1. **Check that the pod is actually accepting traffic.**
 

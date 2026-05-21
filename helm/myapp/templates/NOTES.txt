@@ -1,0 +1,60 @@
+Thanks for installing {{ .Chart.Name }} ({{ .Chart.Name }}-{{ .Chart.Version }}, appVersion {{ .Chart.AppVersion }}).
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+Replicas: {{ .Values.replicaCount }}
+
+1. Check rollout status:
+
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ .Release.Name }}
+
+2. Reach the app:
+{{- if and .Values.ingress.enabled .Values.ingress.host }}
+{{- $scheme := ternary "https" "http" .Values.ingress.tls.enabled }}
+
+  {{ $scheme }}://{{ .Values.ingress.host }}/
+
+  (served via IngressClass {{ .Values.ingress.className | quote }})
+{{- else if .Values.ingress.enabled }}
+
+  Ingress is enabled but ingress.host is empty — set it in values, or port-forward:
+
+    kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }} 8080:{{ .Values.service.port }}
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+  Wait for the LoadBalancer to get an external address:
+
+    kubectl -n {{ .Release.Namespace }} get svc {{ .Release.Name }} -w
+
+  Then: http://<EXTERNAL-IP>:{{ .Values.service.port }}/
+{{- else if eq .Values.service.type "NodePort" }}
+
+  NODE_PORT=$(kubectl -n {{ .Release.Namespace }} get svc {{ .Release.Name }} -o jsonpath='{.spec.ports[0].nodePort}')
+  NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
+  echo "http://$NODE_IP:$NODE_PORT/"
+{{- else }}
+
+  Port-forward to the service:
+
+    kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }} 8080:{{ .Values.service.port }}
+
+  Then open: http://localhost:8080/
+{{- end }}
+
+3. Observability:
+{{- if .Values.metrics.serviceMonitor.enabled }}
+  - ServiceMonitor enabled — Prometheus should be scraping {{ .Release.Name }}.
+{{- else }}
+  - ServiceMonitor disabled (set metrics.serviceMonitor.enabled=true to enable scraping).
+{{- end }}
+{{- if .Values.metrics.alerts.enabled }}
+  - PrometheusRule alerts are installed for this release.
+{{- end }}
+{{- if .Values.metrics.dashboard.enabled }}
+  - Grafana dashboard ConfigMap is installed for this release.
+{{- end }}
+
+4. Tail logs:
+
+  kubectl -n {{ .Release.Namespace }} logs -l app={{ .Release.Name }} -f --tail=100

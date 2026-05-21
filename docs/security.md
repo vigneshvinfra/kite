@@ -2,6 +2,15 @@
 
 How this repo's production deploy is secured, organized by the four
 asks in the assignment, plus known gaps.
+## Table of contents
+  - [Secret Management](#secret-management)
+    - [Approach](#approach)
+    - [Advantages](#advantages)
+  - [Access control (RBAC)](#access-control-rbac)
+  - [Network isolation](#network-isolation)
+    - [NetworkPolicy](#networkpolicy)
+    - [NetworkPolicy reference](#networkpolicy-reference)
+  - [Image security](#image-security)
 
 ### Secret Management
 
@@ -121,11 +130,9 @@ The cluster runs in a VPC with three subnet tiers. Worker nodes have **no public
 Kubernetes' default network policy is **default-allow** which means any pod can talk to any other in any namespace.
 
 default-deny:
-This network policy elects myapp pods and declares both Ingress and Egress policy types with no rules. By itself Everything is denied i.e The pod can't be reached from another namespace, can't call out to the internet, can't reach internal services it's not explicitly allowed to., combined with the allow policies below, it makes the default posture explicit and visible in audits
+This network policy elects myapp pods and declares both Ingress and Egress policy types with no rules. By itself Everything is denied i.e The pod can't be reached from another namespace, can't call out to the internet, can't reach internal services it's not explicitly allowed to., combined with the allow policies below, it makes the default posture explicit and visible in audits.
 
-
-
-#### NetworkPolicies —  Reference
+#### NetworkPolicy Reference
 
 All policies below are in addition to the explicit `<release>-default-deny`, which selects the same pods and declares both `Ingress` and `Egress` policy types. The default posture for `myapp` pods is therefore deny-all; the policies below are the explicit allows.
 
@@ -164,19 +171,10 @@ The runtime image is roughly 10 MB. Less code, less attack surface.
   statically-linked Go binary with no glibc dependency. The runtime
   image has no dynamic linker, no shared libraries, no toolchain.
 
-- **Build Pipeline:** images are built and pushed only from the
-  CI workflow in `.github/workflows/docker-publish.yaml`. No
-  human builds and pushes from a laptop. We also have no build secrets baked in.
-- **Vulnerability scanning:** Trivy (`aquasecurity/trivy-action`) scans every built image. SARIF output is uploaded to GitHub's Security tab via
-  `github/codeql-action/upload-sarif@v4`, which surfaces findings
-  inline in PRs.   What Trivy actually catches:
+- **Build Pipeline:** images are built and pushed only from the CI workflow in `.github/workflows/docker-publish.yaml`. No human builds pushes from a laptop for deployment. We also have no build secrets baked in.
+- **Vulnerability scanning:** Trivy (`aquasecurity/trivy-action`) scans every built image. SARIF output is uploaded to GitHub's Security tab via `github/codeql-action/upload-sarif@v4`, which surfaces findings inline in PRs.   What Trivy actually catches:
 
-  - **OS-level CVEs** in the base image's packages (e.g., a glibc
-    CVE in the build stage).
-  - **Go module vulnerabilities** from the binary's pinned
-    dependencies (via Go's vulnerability database).
-  - **Misconfigurations** — Trivy also has a config-scanning mode for
-    Dockerfile patterns (running as root, missing HEALTHCHECK, etc.),
-    though we don't run that mode today.
-  - **Secrets accidentally baked in** — Trivy looks for high-entropy
-    strings and known credential patterns.
+  - **OS-level CVEs** in the base image's packages (e.g., a glibc CVE in the build stage).
+  - **Go module vulnerabilities** from the binary's pinned dependencies (via Go's vulnerability database).
+  - **Misconfigurations** — Trivy also has a config-scanning mode for Dockerfile patterns (running as root,missing HEALTHCHECK, etc.),though we don't run that mode today.
+  - **Secrets accidentally baked in** — Trivy looks for high-entropy strings and known credential patterns.

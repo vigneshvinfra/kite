@@ -1,0 +1,20 @@
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-cluster
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    env: dev
+stringData:
+  name: dev
+  server: https://10.0.1.54:6443
+  config: |
+    {
+      "bearerToken": "<REDACTED",
+      "tlsClientConfig": {
+        "insecure": false,
+        "caData": "<REDACTED>"
+      }
+    }
