@@ -1,7 +1,7 @@
 replicaCount: 3
 
 image:
-  tag: "0738273"
+  tag: 1e2f27c
 
 env:
   ENV: prod
