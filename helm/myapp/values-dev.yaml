@@ -1,6 +1,6 @@
 
 image:
-  tag: 1e2f27c
+  tag: cd709ef
 
 env:
   ENV: dev
