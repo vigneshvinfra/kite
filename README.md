@@ -488,7 +488,7 @@ Both patterns can pull from AWS Secrets Manager. External Secrets Operator syncs
 
   - **Sigstore / cosign image signing.** Sign images in CI with cosign, verify the signature on admission. Pairs naturally with digest pinning above and with Kyverno below.
 
-    - **Kyverno for admission policy.** Today we rely on convention (immutable SHA tags, distroless base image, `automountServiceAccountToken: false`). Kyverno would turn those into enforced policy at admission — reject mutable tags, require signed images, require resource limits — catching drift before it reaches the cluster. It can also *mutate* resources: inject default limits, set securityContext fields the chart forgot, attach Pod Identity labels. Best practices become automatic behaviour rather than reviewer-enforced rules.
+  - **Kyverno for admission policy.** Today we rely on convention (immutable SHA tags, distroless base image, `automountServiceAccountToken: false`). Kyverno would turn those into enforced policy at admission — reject mutable tags, require signed images, require resource limits — catching drift before it reaches the cluster. It can also *mutate* resources: inject default limits, set securityContext fields the chart forgot, attach Pod Identity labels. Best practices become automatic behaviour rather than reviewer-enforced rules.
 
   - **Human RBAC on Argo CD.** Currently a single bootstrap admin login (`argocd-initial-admin-secret`). Should be SSO (Dex + OIDC) with per-team RBAC tied to AppProjects, and the initial admin secret deleted.
 

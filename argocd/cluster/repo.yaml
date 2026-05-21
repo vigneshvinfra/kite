@@ -10,10 +10,4 @@ stringData:
   type: git
   url: git@github.com:vigneshvinfra/kite.git
   sshPrivateKey: |  
-    -----BEGIN OPENSSH PRIVATE KEY-----
-    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-    QyNTUxOQAAACD6PugR2ohPHbMsXl924rRx3XLtx9eQQZ5GBZAg4KByegAAAJjf63rz3+t6
-    8wAAAAtzc2gtZWQyNTUxOQAAACD6PugR2ohPHbMsXl924rRx3XLtx9eQQZ5GBZAg4KByeg
-    AAAEAwdCE3u7Vud2tuOkDdKud+txUcFpXyLBLMyq1pWvvj1/o+6BHaiE8dsyxeX3bitHHd
-    cu3H15BBnkYFkCDgoHJ6AAAAFHZpZ25lc2h2aW5mcmFAZ2l0aHViAQ==
-    -----END OPENSSH PRIVATE KEY-----
+   <REDACTED>
