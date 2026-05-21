@@ -143,7 +143,7 @@ func main() {
 
 	// Root route — instrumented for metrics, structured logs, and traces
 	mux.Handle("/", otelhttp.NewHandler(instrument("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello\n"))
+		w.Write([]byte("hello kite\n"))
 	}), "root"))
 
 	// Probes — metrics + logs, but no tracing (high-frequency, not interesting)
