@@ -1,0 +1,15 @@
+# Version control
+.git
+.gitignore
+
+# CI / deployment config (not needed to build the Go binary)
+.github
+argocd
+helm
+docs
+README.md
+Dockerfile
+.dockerignore
+
+# OS / editor cruft
+**/.DS_Store
