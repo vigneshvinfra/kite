@@ -52,6 +52,13 @@ var (
 	)
 )
 
+// probePaths are kubelet probe endpoints. They fire every few seconds per pod,
+// so we suppress their (always-200) access logs but we still log them on failure, which is exactly when a probe is worth seeing
+var probePaths = map[string]bool{
+	"/health": true,
+	"/ready":  true,
+}
+
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
@@ -76,12 +83,16 @@ func instrument(path string, next http.HandlerFunc) http.HandlerFunc {
 		httpRequestsTotal.WithLabelValues(r.Method, path, strconv.Itoa(rec.status)).Inc()
 		httpRequestDuration.WithLabelValues(r.Method, path).Observe(duration)
 
-		slog.Info("request",
-			"method", r.Method,
-			"path", path,
-			"status", rec.status,
-			"duration_ms", time.Since(start).Milliseconds(),
-		)
+		// Skip access logs for healthy probe traffic; always log real requests
+		// and any probe that failed (status >= 400).
+		if !probePaths[path] || rec.status >= 400 {
+			slog.Info("request",
+				"method", r.Method,
+				"path", path,
+				"status", rec.status,
+				"duration_ms", time.Since(start).Milliseconds(),
+			)
+		}
 	}
 }
 
