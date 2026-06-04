@@ -43,6 +43,17 @@ secrets:
 networkPolicy:
   enabled: false
 
+# PodDisruptionBudget — keep a floor of healthy pods during voluntary
+# disruptions (node drains, cluster upgrades, autoscaler scale-down).
+pdb:
+  enabled: false
+  minAvailable: 1
+
+# Spread replicas across failure domains so a single node/zone loss
+# never takes out all of them. labelSelector is injected from the
+# selectorLabels helper, so it can't drift from the pod labels.
+topologySpreadConstraints: []
+
 metrics:
   serviceMonitor:
     enabled: false

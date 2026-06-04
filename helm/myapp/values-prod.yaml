@@ -65,3 +65,18 @@ networkPolicy:
     enabled: false
     namespace: observability
     port: 4317
+
+# With replicaCount: 3, keep at least 2 serving during a node drain
+# (so a drain evicts at most one pod at a time).
+pdb:
+  enabled: true
+  minAvailable: 2
+
+# Hard-spread one pod per node (we run >=3 nodes); best-effort across zones.
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
