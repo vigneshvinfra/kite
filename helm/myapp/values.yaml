@@ -27,6 +27,15 @@ resources:
     cpu: 200m
     memory: 128Mi
 
+# When enabled, the HPA owns spec.replicas and the Deployment omits it
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 0
+  behavior: {}
+
 commonLabels:
   team: devops
 

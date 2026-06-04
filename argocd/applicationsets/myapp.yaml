@@ -30,6 +30,12 @@ spec:
       destination:
         name: '{{name}}'
         namespace: 'myapp-{{name}}'
+      # The Deployment already omits spec.replicas when the HPA is enabled
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
       syncPolicy:
         automated:
           prune: true
@@ -37,3 +43,4 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - RespectIgnoreDifferences=true

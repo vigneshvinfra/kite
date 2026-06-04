@@ -27,6 +27,20 @@ resources:
     cpu: 500m
     memory: 256Mi
 
+# HPA owns replica count in prod, so replicaCount above is ignored
+# (deployment.yaml drops spec.replicas when autoscaling is enabled).
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  behavior:
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+
 secrets:
   enabled: true
   objects:

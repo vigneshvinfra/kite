@@ -5,7 +5,9 @@ metadata:
   labels:
     {{- include "myapp.labels" . | nindent 4 }}
 spec:
+  {{- if ne (include "myapp.hpaActive" .) "true" }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "myapp.selectorLabels" . | nindent 6 }}
