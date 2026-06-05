@@ -12,7 +12,7 @@ on:
     types: [published]
 
 permissions:
-  contents: write
+  contents: read
   packages: write
   security-events: write
   actions: read
@@ -25,6 +25,11 @@ jobs:
   build-and-publish-image:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write        # only this job may push the dev tag bump to main
+      packages: write
+      security-events: write
+      actions: read
     outputs:
       short_sha: ${{ steps.sha.outputs.short_sha }}
     steps:
@@ -67,10 +72,22 @@ jobs:
         run: |
           set -euo pipefail
           sed -i "s/^  tag: .*/  tag: ${NEW_TAG}/" helm/myapp/values-dev.yaml
+
           if git diff --quiet helm/myapp/values-dev.yaml; then
             echo "values-dev.yaml already at ${NEW_TAG}, nothing to commit."
             exit 0
           fi
+
+          # Scope guard: refuse to push if anything other than the dev values
+          # file changed, or if the diff is not a single clean tag-bump line.
+          CHANGED=$(git diff --name-only)
+          if [ "$CHANGED" != "helm/myapp/values-dev.yaml" ]; then
+            echo "Unexpected changes, refusing to push:"; echo "$CHANGED"; exit 1
+          fi
+          if [ "$(git diff -U0 helm/myapp/values-dev.yaml | grep -cE '^\+  tag: ')" != "1" ]; then
+            echo "Diff is not a clean tag bump, refusing to push."; exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add helm/myapp/values-dev.yaml
