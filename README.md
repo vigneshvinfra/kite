@@ -34,7 +34,7 @@ deploy.
 ### VPC Layout
 Prod EKS cluster runs in a dedicated VPC in `us-east-1` with CIDR `10.0.0.0/16`, spread across three AZs (`us-east-1a`, `us-east-1b`, and
 `us-east-1c`). We have a single VPC dedicated to the production cluster. An **Internet Gateway** is attached to the VPC. Only the public subnets
-have a `0.0.0.0/0` route, which points to the internet. Private subnets
+have a `0.0.0.0/0` route, which points to the internet.
 
 The AWS Load balancer controller places the NLB in the public subnets. The NAT gateway also sits in one of these public subnets (`us-east-1a`) so that it can reach the IGW. We have 3 private subnets one per AZ (`10.0.10.0/24`, `10.0.11.0/24`, `10.0.12.0/24`). The **EKS worker nodes** run here in the private subnet. Their default route is the NAT gateway, which means nodes can pull images, reach Secrets Manager, and so on, but nothing on the internet can reach them directly.
 

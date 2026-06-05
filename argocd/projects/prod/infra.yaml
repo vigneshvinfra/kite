@@ -10,10 +10,35 @@ spec:
     - https://kubernetes.github.io/ingress-nginx
   destinations:
     - name: prod
-      namespace: '*'
+      namespace: ingress-nginx
+  # Cluster-scoped kinds the ingress-nginx chart (v4.14.1) renders.
+  # Namespace is required because the app syncs with CreateNamespace=true.
   clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: ''
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: networking.k8s.io
+      kind: IngressClass
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+  # Namespaced kinds the ingress-nginx chart renders.
   namespaceResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: apps
+      kind: Deployment
+    - group: batch
+      kind: Job
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
