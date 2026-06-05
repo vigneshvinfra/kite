@@ -13,9 +13,9 @@ spec:
         - alert: MyappHighErrorRate
           expr: |
             (
-              sum(rate(http_requests_total{job="myapp", status=~"5.."}[5m]))
+              sum(rate(http_requests_total{job="{{ .Release.Name }}", status=~"5.."}[5m]))
               /
-              sum(rate(http_requests_total{job="myapp"}[5m]))
+              sum(rate(http_requests_total{job="{{ .Release.Name }}"}[5m]))
             ) > 0.05
           for: 5m
           labels:
@@ -28,7 +28,7 @@ spec:
         - alert: MyappHighLatencyP95
           expr: |
             histogram_quantile(0.95,
-              sum(rate(http_request_duration_seconds_bucket{job="myapp"}[5m])) by (le)
+              sum(rate(http_request_duration_seconds_bucket{job="{{ .Release.Name }}"}[5m])) by (le)
             ) > 1
           for: 10m
           labels:
@@ -39,7 +39,7 @@ spec:
             description: "p95 request latency degraded — check pod CPU, downstream dependencies, or recent deploys."
 
         - alert: MyappTargetDown
-          expr: up{job="myapp"} == 0
+          expr: up{job="{{ .Release.Name }}"} == 0
           for: 2m
           labels:
             severity: critical
