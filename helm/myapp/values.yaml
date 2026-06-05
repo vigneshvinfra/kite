@@ -19,6 +19,26 @@ ingress:
     secretName: ""
   annotations: {}
 
+# Pod-level security context. UID/GID 65532 matches the distroless
+# `nonroot` user baked into the image (Dockerfile `USER nonroot:nonroot`),
+# so runAsNonRoot is enforced at the K8s layer, not just by convention.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container-level hardening. The app writes nothing to disk, so the root
+# filesystem can be read-only.
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
 resources:
   requests:
     cpu: 50m
