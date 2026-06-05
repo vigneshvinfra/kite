@@ -1,6 +1,6 @@
 
 image:
-  tag: d5e3cdc
+  tag: bf09c6f
 
 env:
   ENV: dev
